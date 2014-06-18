@@ -24,7 +24,7 @@ public class HelloLWJGL {
 		
 		while(!Display.isCloseRequested()) {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			
+			glPushMatrix();
 			glRotatef(angle, 0, 0, 1);
 			angle = (angle+1)%360;
 			
@@ -38,7 +38,7 @@ public class HelloLWJGL {
 			glVertex3i(100, 200, -100);
 			glVertex3i(100, 200, 0);*/
 			glEnd();
-			
+			glPopMatrix();
 			Display.update();
 			Display.sync(60);
 		}

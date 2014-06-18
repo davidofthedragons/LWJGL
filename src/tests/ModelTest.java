@@ -79,7 +79,7 @@ public class ModelTest extends AbstractGame {
     		kill();
     		System.exit(1);
     	}
-    	modelDisplayList = model.createDisplayList();
+    	modelDisplayList = model.createDisplayList(0);
         
 	}
 	
@@ -119,6 +119,8 @@ public class ModelTest extends AbstractGame {
 		if(movingDown) {
 			camera.moveDown(moveSpeed);
 		}
+		System.out.println("(" + camera.getPos().geti()
+				+ ", " + camera.getPos().getj() + ", " + camera.getPos().getk() + ")");
 	}
 
 	float angle = 0.0f;

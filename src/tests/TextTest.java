@@ -3,6 +3,7 @@ package tests;
 import static org.lwjgl.opengl.GL11.*;
 
 import java.awt.Font;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -13,6 +14,7 @@ import org.newdawn.slick.TrueTypeFont;
 import lib.game.AbstractGame;
 import lib.game.RenderUtils;
 import lib.text.TextRenderer;
+import math.geom.Point2f;
 
 public class TextTest extends AbstractGame {
 
@@ -30,7 +32,7 @@ public class TextTest extends AbstractGame {
 		RenderUtils.initStd2d(width, height);
 		font = new TrueTypeFont(new Font("Arial", Font.BOLD, 24), false);
 		try {
-			textRenderer = new TextRenderer();
+			textRenderer = new TextRenderer(new File("res/font.png"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -56,7 +58,7 @@ public class TextTest extends AbstractGame {
 		//Color.white.bind();
 		//font.drawString(50, 50, "Hello LWJGL", fontColor);
 		glColor3f(0.0f, 1.0f, 0.0f);
-		textRenderer.renderText("Hello LWJGL", 50, 50, 20);
+		textRenderer.renderText("Hello LWJGL", new Point2f(50.0f, 50.0f), 30.0f, 50.0f);
 		
 	}
 

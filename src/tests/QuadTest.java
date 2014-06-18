@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import lib.text.TextRenderer;
+import math.geom.Point2f;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -65,19 +66,17 @@ public class QuadTest {
 		glDepthFunc(GL_LEQUAL);
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);*/
 		javaTex = loadTexture("Java");
-		text = new TextRenderer();
+		text = new TextRenderer(new File("res/font1.jpg"));
 	}
-	
+	int count = 0;
 	private void renderScene() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
 		
-		//glTranslatef(-1.5f, 0.0f, -6.0f);
-		
-		
+//		glColor3f(0.0f, 1.0f, 0.0f);
 		drawSquare(mouseX-50, (float)height-mouseY-50, 0, 100, javaTex);
-		text.renderText("abcdefg", 0, 0, 50);
-		
+		text.renderText(count + "", new Point2f(0.0f, 0.0f), 30.0f, 50.0f);
+		count++;
 	}
 	
 	private void drawSquare(float sx, float sy, float sz, float size, Texture t) {

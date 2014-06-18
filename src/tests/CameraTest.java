@@ -17,12 +17,19 @@ public class CameraTest extends AbstractGame {
 	Camera camera = new Camera(new Vector3f(0.0f, 5.0f, 0.0f), -3.0f, 0.0f, 0.0f);
 	float camSpeed = 0.1f;
 	float rotSpeed = 0.25f;
+	float y_velocity = 0.0f;
+	
+	float gravity = -0.005f;
+	float jump = 0.1f;
+	
 	boolean movingForward = false;
 	boolean movingBackward = false;
 	boolean movingRight = false;
 	boolean movingLeft = false;
 	boolean movingUp = false;
 	boolean movingDown = false;
+	
+	boolean third = false;
 	
 	private final int KEY_FORWARD = Keyboard.KEY_W;
 	private final int KEY_BACKWARD = Keyboard.KEY_S;
@@ -32,6 +39,7 @@ public class CameraTest extends AbstractGame {
 	private final int KEY_DOWN = Keyboard.KEY_LSHIFT;
 	private final int KEY_CLOSE = Keyboard.KEY_ESCAPE;
 	private final int KEY_RESET = Keyboard.KEY_RETURN;
+	private final int KEY_SWITCH_CAM = Keyboard.KEY_F5;
 	
 	public CameraTest() throws LWJGLException {
 		super("Camera Test", 600, 600, true);
@@ -57,6 +65,7 @@ public class CameraTest extends AbstractGame {
 
 	@Override
 	public void update() {
+		y_velocity += gravity;
 		if(movingForward) {
 			camera.moveForward(camSpeed);
 		}
@@ -69,16 +78,23 @@ public class CameraTest extends AbstractGame {
 		if(movingRight) {
 			camera.moveRight(camSpeed);
 		}
-		if(movingUp) {
-			camera.moveUp(camSpeed);
-		}
-		if(movingDown) {
+		camera.moveUp(y_velocity);
+//		camera.move(new Vector3f(0.0f, 0.0f, y_velocity));
+		if(camera.getPos().getj() <= 0)
+			camera.setPos(camera.getPos().add(new Vector3f(0.0f, -camera.getPos().getj(), 0.0f)));
+		/*if(movingDown) {
 			camera.moveDown(camSpeed);
-		}
+		}*/
 	}
 	
 	public void applyCameraTransform() {
-		camera.applyTransform();
+//		camera.applyTransform();
+		glTranslatef(0.0f, -1.0f, 0.0f);
+		if(third) glTranslatef(0.0f, 0.0f, -5.0f);
+		glRotatef(camera.getXaxisrot(), 1.0f, 0.0f, 0.0f);
+		glRotatef(camera.getYaxisrot(), 0.0f, 1.0f, 0.0f);
+		glRotatef(camera.getTilt(), 0.0f, 0.0f, 1.0f);
+		glTranslatef(-camera.getPos().geti(), -camera.getPos().getj(), -camera.getPos().getk());
 	}
 
 	@Override
@@ -98,12 +114,19 @@ public class CameraTest extends AbstractGame {
 		glColor3f(0.0f, 1.0f, 0.0f);
 		drawLineCube(1.0f);
 		glPopMatrix();
-		glPushMatrix(); {
-			glTranslatef(0.0f, 1.0f, 0.0f);
-			drawLineCube(1.0f);
-			glTranslatef(0.0f, 1.0f, 0.0f);
-			drawLineCube(1.0f);
-		} glPopMatrix();
+		if (third) {
+			glPushMatrix(); {
+				glTranslatef(camera.getPos().geti(), camera.getPos().getj(),
+						camera.getPos().getk());
+//				glTranslatef(0.0f, 0.0f, -3.0f);
+				glRotatef(-camera.getYaxisrot(), 0.0f, 1.0f, 0.0f);
+//				glRotatef(-camera.getXaxisrot(), 1.0f, 0.0f, 0.0f);
+				glTranslatef(-0.5f, 0.0f, -0.5f);
+				drawLineCube(1.0f);
+				glTranslatef(0.0f, 1.0f, 0.0f);
+				drawLineCube(1.0f);
+			} glPopMatrix();
+		}
 		glPopMatrix();
 	}
 
@@ -151,6 +174,7 @@ public class CameraTest extends AbstractGame {
 				if(Keyboard.getEventKeyState()) {
 					movingUp = true;
 					movingDown = false;
+					y_velocity = jump;
 				}
 				else movingUp = false;
 				break;
@@ -164,6 +188,11 @@ public class CameraTest extends AbstractGame {
 			case KEY_RESET:
 				camera = new Camera(new Vector3f(0.0f, 5.0f, 0.0f), -3.0f, 0.0f, 0.0f);
 				break;
+			case KEY_SWITCH_CAM:
+				if(Keyboard.getEventKeyState()) {
+					third = !third;
+					break;
+				}
 			}
 		}
 		

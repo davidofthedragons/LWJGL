@@ -32,7 +32,7 @@ public class Planet extends AbstractEntity3d {
 		super(1.0f);
 		try {
 			model = Model.loadModel(new File("res/orbit/" + name + ".obj"), new File("res/orbit/" + name + ".png"));
-			displayList = model.createDisplayList();
+			displayList = model.createDisplayList(0);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

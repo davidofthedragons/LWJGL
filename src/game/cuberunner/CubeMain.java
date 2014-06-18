@@ -25,7 +25,7 @@ public class CubeMain extends AbstractGame {
 	
 	private Random rand = new Random();
 	
-	private double speed = 0.5;
+	private double speed = 0.5f;
 	private int chunkSize = 10;
 	private float collision = -Cube.SIZE*2;
 	private float lBound = chunkSize*Cube.SIZE*3, rBound = chunkSize*Cube.SIZE*-3;
@@ -169,7 +169,7 @@ public class CubeMain extends AbstractGame {
 	public void generateChunk(float x, float y, float z) { 
 		for(int i=0; i<chunkSize; i++) {
 			for(int j=0; j<chunkSize; j++) {
-				if(rand.nextFloat()<density) cubes.add(new Cube(x+Cube.SIZE*i, y, z+Cube.SIZE*j, speed));
+				if(rand.nextFloat()<density) cubes.add(new Cube(x+Cube.SIZE*i, y, z+Cube.SIZE*j, (float)speed));
 			}
 		}
 	}

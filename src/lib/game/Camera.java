@@ -112,8 +112,8 @@ public class Camera {
 		glRotatef(yaxisrot, 0.0f, 1.0f, 0.0f);
 		glRotatef(tilt, 0.0f, 0.0f, 1.0f);
 		glTranslatef(-pos.geti(), -pos.getj(), -pos.getk());
-		
 	}
+	
 	public Vector3f getLookVect() {
 		float i = (float) (Math.sin(Math.toRadians(yaxisrot)));
 		float j = (float) (-Math.sin(Math.toRadians(xaxisrot)));

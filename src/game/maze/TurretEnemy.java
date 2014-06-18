@@ -4,7 +4,7 @@ import lib.game.AbstractEntity3d;
 
 public class TurretEnemy extends AbstractEntity3d {
 
-	public TurretEnemy(double x, double y, double z, double speed) {
+	public TurretEnemy(float x, float y, float z, float speed) {
 		super(x, y, z, speed);
 		// TODO Auto-generated constructor stub
 	}

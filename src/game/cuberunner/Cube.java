@@ -13,7 +13,7 @@ public class Cube extends AbstractEntity3d {
 	boolean solid = false;
 	Color3f color = new Color3f(0.0f, 1.0f, 0.0f);
 
-	public Cube(double x, double y, double z, double speed) {
+	public Cube(float x, float y, float z, float speed) {
 		super(x, y, z, speed);
 		this.aim(new Point3d(x, y, 0));
 	}
