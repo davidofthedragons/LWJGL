@@ -1,0 +1,17 @@
+#Draw a square
+ECHO Drawing a square...
+#ECHO $pi 
+PEN DOWN
+MOVE 5.0
+ROT YAW 90.0
+MOVE 5.0
+ROT YAW 90.0
+MOVE 5.0
+ROT YAW 90.0
+MOVE 5.0
+PEN UP
+ECHO done!
+#FOR i 0 360
+#ROT YAW 1
+#MOVE 3.0
+#END
