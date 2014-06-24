@@ -39,6 +39,14 @@ public class Chunk {
 		}
 		return null;
 	}
+	public float getGroundHeight(Point3f pos) {
+		float groundHeight = 0.0f;
+		for(Tile t : tiles) {
+			if(!t.getBounds().contains(new Point3f(pos.x, t.getBounds().getCenter().y, pos.z))) continue;
+			if(t.getBounds().getta().y > groundHeight) groundHeight = t.getBounds().getta().y;
+		}
+		return groundHeight;
+	}
 	public void addTile(Tile t) {
 		tiles.add(t);
 	}

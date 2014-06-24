@@ -6,7 +6,7 @@ import math.geom.Vector3f;
 public abstract class Entity {
 
 	public Vector3f velocity = new Vector3f();
-	Point3f pos = new Point3f();
+	public Point3f pos = new Point3f();
 	
 	public Entity(Point3f pos, Vector3f velocity) {
 		this.pos = pos; this.velocity = velocity;

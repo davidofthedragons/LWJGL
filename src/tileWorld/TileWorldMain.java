@@ -20,12 +20,23 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.glu.GLU;
 
+import tileWorld.entity.Entity;
 import tileWorld.entity.Player;
 import tileWorld.tiles.Tile;
 
 public class TileWorldMain extends AbstractGame {
+	
+	/* TODO list
+	 * -fix sides
+	 * -add jumping/crouching
+	 * -gravity/collision detection
+	 * -3rd person
+	 * -more blocks
+	 * -sounds
+	 * -lighting
+	 */
 
-	static final String VERSION = "Alpha v0.1";
+	static final String VERSION = "Alpha v0.2";
 	
 	static boolean fullScreen = true;
 	static boolean mouseGrabbed = true;
@@ -35,11 +46,12 @@ public class TileWorldMain extends AbstractGame {
 	static final int KEY_FORWARD = Keyboard.KEY_W;
 	static final int KEY_RIGHT = Keyboard.KEY_A;
 	static final int KEY_LEFT = Keyboard.KEY_D;
-	static final int KEY_BACK = Keyboard.KEY_S;
+	static final int KEY_BACKWARD = Keyboard.KEY_S;
 	static final int KEY_JUMP = Keyboard.KEY_SPACE;
 	static final int KEY_CROUCH = Keyboard.KEY_LSHIFT;
 	static final int KEY_PAUSE = Keyboard.KEY_ESCAPE;
-	boolean movingForward, movingBackwards, movingRight, movingLeft;
+	static final int KEY_TOGGLE_FLYING = Keyboard.KEY_LCONTROL;
+	boolean movingForward, movingBackward, movingRight, movingLeft, movingUp, movingDown;
 	
 	
 	int FOV = 70;
@@ -48,6 +60,11 @@ public class TileWorldMain extends AbstractGame {
 	GameState state = GameState.CONTINUE;
 	
 	Player player = new Player(new Point3f());
+	boolean flying = true;
+	ArrayList<Entity> entities = new ArrayList<Entity>();
+	
+	float jump = 0.2f;
+	float gravity = 0.01f;
 	
 	ArrayList<Chunk> loadedChunks = new ArrayList<Chunk>();
 	
@@ -74,11 +91,12 @@ public class TileWorldMain extends AbstractGame {
 //		glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0f);
 //		glEnable(GL_COLOR_MATERIAL);
 //		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-//		glEnable(GL_CULL_FACE);
-//		glCullFace(GL_BACK);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		camera = new Camera(new Vector3f(0.0f, 5.0f, 0.0f), -3.0f, 180.0f, 0.0f);
 		camera.setBoundsx(-90.0f, 90.0f);
+		entities.add(player);
 //		camera.moveUp(1.0f);
         Mouse.setGrabbed(mouseGrabbed);
         printMessage("Loading chunks...");
@@ -102,6 +120,7 @@ public class TileWorldMain extends AbstractGame {
 //		enableLighting();
 	}
 	
+	@SuppressWarnings("unused")
 	private void enableLighting() { //TODO lighting
 		glEnable(GL_LIGHTING);
 		glEnable(GL_LIGHT0);
@@ -117,7 +136,21 @@ public class TileWorldMain extends AbstractGame {
 	public void update() { //TODO update
 		switch(state) {
 		case CONTINUE:
-			camera.move(player.velocity);
+			camera.moveUp(player.yVelocity);
+			player.pos = new Point3f(camera.getPos().geti(), camera.getPos().getj()-player.eyeHeight, camera.getPos().getk());
+			if(!flying) {
+				if(player.pos.y>loadedChunks.get(0).getGroundHeight(player.pos)) player.yVelocity -= gravity;
+				else player.yVelocity = 0;
+			}
+			
+			
+//			camera.move(player.velocity);
+			if(movingForward) camera.moveForward(player.speed);
+			if(movingBackward) camera.moveBackward(player.speed);
+			if(movingLeft) camera.moveRight(player.speed);
+			if(movingRight) camera.moveLeft(player.speed);
+			if(movingUp && flying) camera.moveUp(player.speed);
+			if(movingDown && flying) camera.moveDown(player.speed);
 			break;
 		case MENU:
 			break;
@@ -135,7 +168,10 @@ public class TileWorldMain extends AbstractGame {
 			glPushMatrix();
 			camera.applyTransform();
 //			RenderUtils.applyColor(Color3f.black);
-//			RenderUtils.drawLineCube(4);
+//			glPushMatrix();
+//			glTranslatef(0.0f, Tile.height, 0.0f);
+//			RenderUtils.drawLineCube(Tile.height);
+//			glPopMatrix();
 			for(Chunk c : loadedChunks) {
 				for(Tile t : c.tiles) {
 					t.render();
@@ -143,6 +179,12 @@ public class TileWorldMain extends AbstractGame {
 			}
 			
 			glPopMatrix();
+			break;
+		case MENU:
+			break;
+		case PAUSE:
+			break;
+		default:
 			break;
 		}
 		
@@ -160,41 +202,56 @@ public class TileWorldMain extends AbstractGame {
 		while (Keyboard.next()) {
 			switch (state) {
 			case CONTINUE:
-				player.velocity = new Vector3f();
-				if (Keyboard.getEventKeyState()) {
-					switch (Keyboard.getEventKey()) {
-					case KEY_PAUSE:
-						stop();
-						break;
-					case KEY_FORWARD:
-						player.velocity
-								.seti((float) (Math.sin(player.angle) * player.speed));
-						player.velocity
-								.setk((float) (-Math.cos(player.angle) * player.speed));
-						break;
-					case KEY_RIGHT:
-						player.velocity.seti((float) (Math.sin(player.angle
-								- Math.PI / 2) * -player.speed));
-						player.velocity.setk((float) (-Math.cos(player.angle
-								- Math.PI / 2) * -player.speed));
-						break;
-					case KEY_LEFT:
-						player.velocity.seti((float) (Math.sin(player.angle
-								- Math.PI / 2) * player.speed));
-						player.velocity.setk((float) (-Math.cos(player.angle
-								- Math.PI / 2) * player.speed));
-						break;
-					case KEY_BACK:
-						player.velocity
-								.seti((float) (Math.sin(player.angle) * -player.speed));
-						player.velocity
-								.setk((float) (-Math.cos(player.angle) * -player.speed));
-						break;
-					case KEY_JUMP:
-						break;
-					case KEY_CROUCH:
-						break;
+				switch(Keyboard.getEventKey()) {
+				case KEY_PAUSE:
+					if(Keyboard.getEventKeyState()) stop();
+					break;
+				case KEY_FORWARD:
+					if(Keyboard.getEventKeyState()) {
+						movingForward = true;
+						movingBackward = false;
 					}
+					else movingForward = false;
+					break;
+				case KEY_BACKWARD:
+					if(Keyboard.getEventKeyState()) {
+						movingBackward = true;
+						movingForward = false;
+					}
+					else movingBackward = false;
+					break;
+				case KEY_LEFT:
+					if(Keyboard.getEventKeyState()) {
+						movingLeft = true;
+						movingRight = false;
+					}
+					else movingLeft = false;
+					break;
+				case KEY_RIGHT:
+					if(Keyboard.getEventKeyState()) {
+						movingRight = true;
+						movingLeft = false;
+					}
+					else movingRight = false;
+					break;
+				case KEY_JUMP:
+					if(Keyboard.getEventKeyState()) {
+						movingUp = true;
+						movingDown = false;
+						if(!flying)player.yVelocity = jump;
+					}
+					
+					else movingUp = false;
+					break;
+				case KEY_CROUCH:
+						if(Keyboard.getEventKeyState()) {
+							movingDown = true;
+							movingUp = false;
+						}
+						else movingDown = false;
+					break;
+				case KEY_TOGGLE_FLYING:
+					if(Keyboard.getEventKeyState()) flying = !flying;
 				}
 				break;
 			case MENU:
