@@ -4,8 +4,7 @@ import java.util.Random;
 
 import math.geom.Point3f;
 import tileWorld.tiles.Tile;
-import tileWorld.tiles.TileGrass;
-import tileWorld.tiles.TileStone;
+import tileWorld.tiles.*;
 
 public class GenBasic {
 
@@ -17,7 +16,7 @@ public class GenBasic {
 
 	public Chunk genChunk(float startx, float startz) {
 //		Chunk chunk = new Chunk();
-		Tile[][][] tiles = new Tile[Chunk.SIZE][Chunk.SIZE][Chunk.SIZE];
+		Tile[][][] tiles = new Tile[Chunk.SIZE][Chunk.HEIGHT][Chunk.SIZE];
 		for(int i=0; i<Chunk.SIZE; i++) {
 			for(int j=0; j<Chunk.SIZE; j++) {
 				for(int k=0; k<Chunk.SIZE; k++) {
@@ -60,13 +59,14 @@ public class GenBasic {
 		}
 		for(int i=0; i<Chunk.SIZE/8; i++) {
 			for(int j=0; j<Chunk.SIZE/8; j++) {
-				Tile t = new TileStone(new BoundRect(new Point3f(startx+(i*Tile.xlength), Tile.height*3, startz+(j*Tile.zlength)),
+				Tile t = new TileGrass(new BoundRect(new Point3f(startx+(i*Tile.xlength), Tile.height*3, startz+(j*Tile.zlength)),
 						Tile.xlength, Tile.height, Tile.zlength));
 				System.out.println("Adding tile " + t.name + " at " + t.getBounds().getCenter());
 				tiles[i][3][j] = t;
 			}
 		}
-		Chunk chunk = new Chunk(tiles);
+		Chunk chunk = new Chunk(tiles, new BoundRect(new Point3f(startx, 0.0f, startz),
+				Chunk.SIZE*Tile.xlength, Chunk.SIZE*Tile.height, Chunk.SIZE*Tile.zlength));
 		return chunk;
 	}
 	

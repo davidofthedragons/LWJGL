@@ -14,6 +14,10 @@ public class TileGrass extends Tile {
 		name = "TileGrass";
 	}
 
+	public TileGrass() {
+		name = "TileGrass";
+	}
+
 	@Override
 	public void walk() {
 		

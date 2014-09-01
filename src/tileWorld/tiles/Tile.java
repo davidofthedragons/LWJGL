@@ -8,12 +8,15 @@ import static org.lwjgl.opengl.GL11.glPushMatrix;
 import static org.lwjgl.opengl.GL11.glTexCoord2f;
 import static org.lwjgl.opengl.GL11.glTranslatef;
 import static org.lwjgl.opengl.GL11.glVertex3f;
+
+import java.io.Serializable;
+
 import graphics.Color3f;
 import lib.game.RenderUtils;
 import tileWorld.Assets;
 import tileWorld.BoundRect;
 
-public abstract class Tile {
+public abstract class Tile implements Serializable {
 
 	public String name = "Tile";
 	
@@ -24,6 +27,7 @@ public abstract class Tile {
 	private boolean breakable;
 	private boolean solid;
 	
+	public Tile() {}
 	
 	public Tile(BoundRect bounds) {
 		this.bounds = bounds;
@@ -39,49 +43,49 @@ public abstract class Tile {
 		glBegin(GL_QUADS); {
 			if (above==null) {
 				//top
-				glTexCoord2f(0.0f, 0.0f); glVertex3f(-xlength / 2, height / 2, -zlength / 2);
-				glTexCoord2f(0.0f, 1.0f); glVertex3f(-xlength / 2, height / 2, zlength / 2);
-				glTexCoord2f(1.0f, 1.0f); glVertex3f(xlength / 2, height / 2, zlength / 2);
-				glTexCoord2f(1.0f, 0.0f); glVertex3f(xlength / 2, height / 2, -zlength / 2);
+				glTexCoord2f(0.0f, 0.0f);  glVertex3f(-xlength/2, height/2, -zlength/2);
+				glTexCoord2f(0.0f, 0.25f); glVertex3f(-xlength/2, height/2,  zlength/2);
+				glTexCoord2f(1.0f, 0.25f); glVertex3f( xlength/2, height/2,  zlength/2);
+				glTexCoord2f(1.0f, 0.0f);  glVertex3f( xlength/2, height/2, -zlength/2);
 			}
 			if (below == null) {
 				//bottom
-				glTexCoord2f(0.0f, 0.0f); glVertex3f(-xlength / 2, -height / 2, zlength / 2);
-				glTexCoord2f(0.0f, 1.0f); glVertex3f(-xlength / 2, -height / 2, -zlength / 2);
-				glTexCoord2f(1.0f, 1.0f); glVertex3f(xlength / 2, -height / 2, -zlength / 2);
-				glTexCoord2f(1.0f, 0.0f); glVertex3f(xlength / 2, -height / 2, zlength / 2);
+				glTexCoord2f(0.0f, 0.75f); glVertex3f(-xlength/2, -height/2,  zlength/2);
+				glTexCoord2f(0.0f, 1.0f);  glVertex3f(-xlength/2, -height/2, -zlength/2);
+				glTexCoord2f(1.0f, 1.0f);  glVertex3f( xlength/2, -height/2, -zlength/2);
+				glTexCoord2f(1.0f, 0.75f); glVertex3f( xlength/2, -height/2,  zlength/2);
 			}
 			if (west==null) {
 				//left
-				RenderUtils.applyColor(Color3f.red);
-				glTexCoord2f(0.0f, 0.0f); glVertex3f(-xlength / 2, -height / 2, -zlength / 2);
-				glTexCoord2f(0.0f, 0.5f); glVertex3f(-xlength / 2, -height / 2, zlength / 2);
-				glTexCoord2f(1.0f, 0.5f); glVertex3f(-xlength / 2, height / 2, zlength / 2);
-				glTexCoord2f(1.0f, 0.0f); glVertex3f(-xlength / 2, height / 2, -zlength / 2);
+//				RenderUtils.applyColor(Color3f.red);
+				glTexCoord2f(0.0f, 0.625f); glVertex3f(-xlength/2, -height/2, -zlength/2);
+				glTexCoord2f(1.0f, 0.625f); glVertex3f(-xlength/2, -height/2,  zlength/2);
+				glTexCoord2f(1.0f, 0.5f);   glVertex3f(-xlength/2,  height/2,  zlength/2);
+				glTexCoord2f(0.0f, 0.5f);   glVertex3f(-xlength/2,  height/2, -zlength/2);
 			}
 			if (east==null) {
 				//right
-				RenderUtils.applyColor(Color3f.green);
-				glTexCoord2f(0.0f, 0.0f); glVertex3f(xlength / 2, -height / 2, zlength / 2);
-				glTexCoord2f(0.0f, 0.5f); glVertex3f(xlength / 2, -height / 2, -zlength / 2);
-				glTexCoord2f(1.0f, 0.5f); glVertex3f(xlength / 2, height / 2, -zlength / 2);
-				glTexCoord2f(1.0f, 0.0f); glVertex3f(xlength / 2, height / 2, zlength / 2);
+//				RenderUtils.applyColor(Color3f.green);
+				glTexCoord2f(0.0f, 0.75f);  glVertex3f(xlength/2, -height/2,  zlength/2);
+				glTexCoord2f(1.0f, 0.75f);  glVertex3f(xlength/2, -height/2, -zlength/2);
+				glTexCoord2f(1.0f, 0.625f); glVertex3f(xlength/2,  height/2, -zlength/2);
+				glTexCoord2f(0.0f, 0.625f); glVertex3f(xlength/2,  height/2,  zlength/2);
 			}
 			if (south==null) {
 				//front
-				RenderUtils.applyColor(Color3f.blue);
-				glTexCoord2f(0.0f, 0.0f); glVertex3f(xlength / 2, -height / 2, -zlength / 2);
-				glTexCoord2f(0.0f, 0.5f); glVertex3f(-xlength / 2, -height / 2, -zlength / 2);
-				glTexCoord2f(1.0f, 0.5f); glVertex3f(-xlength / 2, height / 2, -zlength / 2);
-				glTexCoord2f(1.0f, 0.0f); glVertex3f(xlength / 2, height / 2, -zlength / 2);
+//				RenderUtils.applyColor(Color3f.blue);
+				glTexCoord2f(0.0f, 0.375f);  glVertex3f( xlength/2, -height/2, -zlength/2);
+				glTexCoord2f(1.0f, 0.375f); glVertex3f(-xlength/2, -height/2, -zlength/2);
+				glTexCoord2f(1.0f, 0.25f); glVertex3f(-xlength/2,  height/2, -zlength/2);
+				glTexCoord2f(0.0f, 0.25f);  glVertex3f( xlength/2,  height/2, -zlength/2);
 			}
 			if (north==null) {
 				//back
-				RenderUtils.applyColor(Color3f.black);
-				glTexCoord2f(0.0f, 0.0f); glVertex3f(-xlength / 2, -height / 2, zlength / 2);
-				glTexCoord2f(0.0f, 0.5f); glVertex3f(xlength / 2, -height / 2, zlength / 2);
-				glTexCoord2f(1.0f, 0.5f); glVertex3f(xlength / 2, height / 2, zlength / 2);
-				glTexCoord2f(1.0f, 0.0f); glVertex3f(-xlength / 2, height / 2, zlength / 2);
+//				RenderUtils.applyColor(Color3f.black);
+				glTexCoord2f(0.0f, 0.5f);   glVertex3f(-xlength/2, -height/2, zlength/2);
+				glTexCoord2f(1.0f, 0.5f);   glVertex3f( xlength/2, -height/2, zlength/2);
+				glTexCoord2f(1.0f, 0.375f); glVertex3f( xlength/2,  height/2, zlength/2);
+				glTexCoord2f(0.0f, 0.375f); glVertex3f(-xlength/2,  height/2, zlength/2);
 			}
 			
 		} glEnd();
@@ -95,6 +99,10 @@ public abstract class Tile {
 	public BoundRect getBounds() {
 		return bounds;
 	}
+	public void setBounds(BoundRect bounds) {
+		this.bounds = bounds;
+	}
+	
 	public boolean isBreakable() {
 		return breakable;
 	}

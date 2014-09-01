@@ -6,6 +6,7 @@ import graphics.Color3f;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Random;
 
 import lib.game.AbstractGame;
 import lib.game.Camera;
@@ -21,19 +22,24 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.util.glu.GLU;
 
 import tileWorld.entity.Entity;
+import tileWorld.entity.ParticleEmitter;
 import tileWorld.entity.Player;
+import tileWorld.gen.GenChunks;
+import tileWorld.gen.GenHeightMap;
 import tileWorld.tiles.Tile;
 
 public class TileWorldMain extends AbstractGame {
 	
 	/* TODO list
-	 * -fix sides
-	 * -add jumping/crouching
-	 * -gravity/collision detection
+	 * -add crouching
+	 * -collision detection
 	 * -3rd person
 	 * -more blocks
 	 * -sounds
 	 * -lighting
+	 * -proper terrain gen
+	 * -infinite world
+	 * -save world
 	 */
 
 	static final String VERSION = "Alpha v0.2";
@@ -61,14 +67,16 @@ public class TileWorldMain extends AbstractGame {
 	
 	Player player = new Player(new Point3f());
 	boolean flying = true;
-	ArrayList<Entity> entities = new ArrayList<Entity>();
+//	ArrayList<Entity> entities = new ArrayList<Entity>();
 	
-	float jump = 0.2f;
+	float jump = 0.17f;
 	float gravity = 0.01f;
 	
-	ArrayList<Chunk> loadedChunks = new ArrayList<Chunk>();
+//	ArrayList<Chunk> loadedChunks = new ArrayList<Chunk>();
+//	Chunk playerChunk;
 	
 	GenBasic gen = new GenBasic(718);
+	Random rand = new Random();
 	
 	
 	public TileWorldMain() throws LWJGLException {
@@ -79,7 +87,7 @@ public class TileWorldMain extends AbstractGame {
 	@Override
 	public void init() { //TODO init
 		printMessage("Loading assets...");
-		Assets.loadTextures(new File("res/tileWorld/textures/textureList"));
+		Assets.load("res/tileWorld/");
 		printMessage("Initializing OpenGL...");
 		glClearColor(0.4f, 0.5f, 1.0f, 0.0f);
 		glEnable(GL_TEXTURE_2D);
@@ -96,11 +104,30 @@ public class TileWorldMain extends AbstractGame {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		camera = new Camera(new Vector3f(0.0f, 5.0f, 0.0f), -3.0f, 180.0f, 0.0f);
 		camera.setBoundsx(-90.0f, 90.0f);
-		entities.add(player);
+		World.entities.add(player);
+		ParticleEmitter pe = new ParticleEmitter(new Point3f(5.0f, 5.0f, 5.0f), new Vector3f(0.0f, 1.0f, 0.0f), 5,
+				new Vector3f(1.0f, 0.0f, 0.0f), 0.25f, 10000, 75, 5, 0.1f, 0.05f, rand);
+		pe.setColors(Color3f.red, Color3f.black, new Color3f(1.0f, 0.25f, 0.0f));
+//		entities.add(pe);
 //		camera.moveUp(1.0f);
-        Mouse.setGrabbed(mouseGrabbed);
-        printMessage("Loading chunks...");
-		loadedChunks.add(gen.genChunk(0.0f, 0.0f));
+		Mouse.setGrabbed(mouseGrabbed);
+		printMessage("Loading chunks...");
+//		loadedChunks.add(gen.genChunk(0.0f, 0.0f));
+		int[][] map = GenHeightMap.genHills(Chunk.SIZE*4, Chunk.SIZE*4, 850, 2, 8, 10, rand);
+//		int[][] map = GenHeightMap.genFractal(Chunk.SIZE*4, Chunk.SIZE*4, rand, 05, 10);
+		World.loadedChunks.add(GenChunks.genChunk(0, 0, map, 5, 3));
+		World.loadedChunks.add(GenChunks.genChunk(Chunk.SIZE, 0, map, 5, 3));
+		World.loadedChunks.add(GenChunks.genChunk(0, Chunk.SIZE, map, 5, 3));
+		World.loadedChunks.add(GenChunks.genChunk(Chunk.SIZE, Chunk.SIZE, map, 5, 3));
+//		World.loadedChunks.add(GenChunks.genChunk(Chunk.SIZE*2, 0, map, 5, 3));
+//		World.loadedChunks.add(GenChunks.genChunk(Chunk.SIZE*2, Chunk.SIZE, map, 5, 3));
+//		loadedChunks.add(gen.genChunk(Chunk.SIZE*Tile.xlength, Chunk.SIZE*Tile.zlength));
+//		World.loadedChunks.add(GenChunks.genChunk(Chunk.SIZE, 0, GenHeightMap.genFault(Chunk.SIZE*4, Chunk.SIZE*4, 200, 1, -5, 15, rand), 5, 3));
+//		World.loadedChunks.add(GenChunks.genChunk(Chunk.SIZE, Chunk.SIZE, GenHeightMap.genFractal(17, 17, rand, 1, 10), 1, 3));
+//		playerChunk = loadedChunks.get(0);
+//		Assets.saveChunk(playerChunk);
+		printMessage("Saving Chunks");
+		World.saveChunks();
 		printMessage("Ready");
 		
 	}
@@ -136,27 +163,88 @@ public class TileWorldMain extends AbstractGame {
 	public void update() { //TODO update
 		switch(state) {
 		case CONTINUE:
-			camera.moveUp(player.yVelocity);
-			player.pos = new Point3f(camera.getPos().geti(), camera.getPos().getj()-player.eyeHeight, camera.getPos().getk());
-			if(!flying) {
-				if(player.pos.y>loadedChunks.get(0).getGroundHeight(player.pos)) player.yVelocity -= gravity;
-				else player.yVelocity = 0;
+			float groundHeight = World.getGroundHeight(player.pos);
+			moveUp(player.yVelocity);
+			if(player.pos.y < groundHeight) {
+				player.pos.y = groundHeight;
+				camera.setPos(new Vector3f(player.pos.x, player.pos.y+player.eyeHeight, player.pos.z));
 			}
-			
+			if(!flying) {
+				if(player.pos.y>groundHeight) {
+					player.yVelocity -= gravity;
+				}
+				else player.yVelocity = 0;
+			} else player.yVelocity = 0;
+//			moveUp(player.yVelocity);
+			//if(playerChunk.hitsTile(player.pos)) {
+//				moveDown(player.yVelocity);
+//				moveUp(player.pos.y-playerChunk.getGroundHeight(player.pos));// = playerChunk.getGroundHeight(player.pos) + 0.1f;
+//				player.yVelocity = 0;
+			//} //else moveUp(player.yVelocity);
+//			movingDown = true;
 			
 //			camera.move(player.velocity);
-			if(movingForward) camera.moveForward(player.speed);
-			if(movingBackward) camera.moveBackward(player.speed);
-			if(movingLeft) camera.moveRight(player.speed);
-			if(movingRight) camera.moveLeft(player.speed);
-			if(movingUp && flying) camera.moveUp(player.speed);
-			if(movingDown && flying) camera.moveDown(player.speed);
+			if(movingForward) {
+				moveForward(player.speed);
+				if(World.hitsTile(player.bounds, 3)) moveBackward(player.speed);
+			}
+			else if(movingBackward) {
+				moveBackward(player.speed);
+				if(World.hitsTile(player.bounds, 3)) moveForward(player.speed);
+			}
+			if(movingLeft) {
+				moveLeft(player.speed);
+				if(World.hitsTile(player.bounds, 3)) moveRight(player.speed);
+			}
+			else if(movingRight) {
+				moveRight(player.speed);
+				if(World.hitsTile(player.bounds, 3)) moveLeft(player.speed);
+			}
+			if(movingUp && flying) {
+				moveUp(player.speed);
+				if(World.hitsTile(player.bounds, 3)) moveDown(player.speed);
+			}
+			else if(movingDown && flying) {
+				moveDown(player.speed);
+				if(World.hitsTile(player.bounds, 3)) moveUp(player.speed);
+			}
+//			for(Chunk c : World.loadedChunks) if(c.getBounds().contains(player.pos)) playerChunk = c;
+			
+			for(Entity e : World.entities) {
+				e.update();
+			}
+			
 			break;
 		case MENU:
 			break;
 		case PAUSE:
 			break;
 		}
+	}
+	
+	private void moveForward(float dist) {
+		camera.moveForward(dist);
+		player.setPos(new Point3f(camera.getPos().geti(), camera.getPos().getj()-player.eyeHeight, camera.getPos().getk()));
+	}
+	private void moveBackward(float dist) {
+		camera.moveBackward(dist);
+		player.setPos(new Point3f(camera.getPos().geti(), camera.getPos().getj()-player.eyeHeight, camera.getPos().getk()));
+	}
+	private void moveLeft(float dist) {
+		camera.moveRight(dist);
+		player.setPos(new Point3f(camera.getPos().geti(), camera.getPos().getj()-player.eyeHeight, camera.getPos().getk()));
+	}
+	private void moveRight(float dist) {
+		camera.moveLeft(dist);
+		player.setPos(new Point3f(camera.getPos().geti(), camera.getPos().getj()-player.eyeHeight, camera.getPos().getk()));
+	}
+	private void moveUp(float dist) {
+		camera.moveUp(dist);
+		player.setPos(new Point3f(camera.getPos().geti(), camera.getPos().getj()-player.eyeHeight, camera.getPos().getk()));
+	}
+	private void moveDown(float dist) {
+		camera.moveDown(dist);
+		player.setPos(new Point3f(camera.getPos().geti(), camera.getPos().getj()-player.eyeHeight, camera.getPos().getk()));
 	}
 
 	@Override
@@ -172,10 +260,21 @@ public class TileWorldMain extends AbstractGame {
 //			glTranslatef(0.0f, Tile.height, 0.0f);
 //			RenderUtils.drawLineCube(Tile.height);
 //			glPopMatrix();
-			for(Chunk c : loadedChunks) {
-				for(Tile t : c.tiles) {
-					t.render();
+			for(Chunk c : World.loadedChunks) {
+//				for(Tile t : c.tiles) {
+//					t.render();
+//				}
+				for(int x=0; x<Chunk.SIZE; x++) {
+					for(int y=0; y<Chunk.HEIGHT; y++) {
+						for(int z=0; z<Chunk.SIZE; z++) {
+							if(c.get(x, y, z) != null)
+								c.get(x, y, z).render();
+						}
+					}
 				}
+			}
+			for(Entity e : World.entities) {
+				e.render();
 			}
 			
 			glPopMatrix();

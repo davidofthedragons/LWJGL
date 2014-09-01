@@ -1,8 +1,10 @@
 package tileWorld;
 
+import java.io.Serializable;
+
 import math.geom.Point3f;
 
-public class BoundRect {
+public class BoundRect implements Serializable {
 
 	//Rectangular prism - ta,tb,tc,td is top rectangle, ba,bb,bc,bd is bottom.
 	
@@ -19,6 +21,8 @@ public class BoundRect {
 	 * |      |
 	 * ta----tb
 	 */
+	
+	public BoundRect() {}
 	
 	public BoundRect(Point3f ta, Point3f bc) {
 		this.ta = ta;
@@ -44,7 +48,14 @@ public class BoundRect {
 	}
 	
 	public boolean contains(Point3f p) {
-		if(p.x>=ta.x && p.x<=tb.x && p.y>=ba.y && p.y<=ta.y && p.z>=ta.z && p.z <=td.z) return true;
+		if(p.x>=ta.x && p.x<=tb.x && p.y>=ba.y && p.y<=ta.y && p.z>=ta.z && p.z<=td.z) return true;
+		return false;
+	}
+	
+	public boolean collides(BoundRect r) {
+		if(contains(r.ba) || contains(r.bb) || contains(r.bc)|| contains(r.bd)
+				|| contains(r.ta) || contains(r.tb) || contains(r.tc)|| contains(r.td))
+			return true;
 		return false;
 	}
 	
